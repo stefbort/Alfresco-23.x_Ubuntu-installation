@@ -21,17 +21,18 @@ A didatic guide to full installation of Alfresco 23 Community from a ZIP package
 # Procedure
 To get started, prepare your production server by installing the prerequisite software (JRE, database, and message broker) before continuing.
 
-1. Installing third-party software;
-2. installing ActiveMQ;
-3. creating DB for Alfresco;
-4. installing Tomcat;
-5. installing Alfresco Community 23;
-6. installing Alfresco Module Package (AMP);
-7. installing Alfresco Transformer Service (ATS);
-8. first test.
+1. Install third-party software used by Community Edition. This includes LibreOffice, ImageMagick, and Alfresco PDF Renderer.
+- Download the distribution zip file by accessing the Alfresco Community Edition download page.
+- Generate certificates for mutual TLS.
+- Download Tomcat and review the installation steps required.
+- Set up Tomcat.
+- Install and configure Community Edition.
+- Install any Alfresco Module Packages (AMPs) such as Alfresco Share, Google Docs Integration, and Alfresco Office Services.
+- Set up ActiveMQ.
+- install AMP (https://docs.alfresco.com/content-services/community/install/zip/amp/)
 
 
-## 1. Install third-party software
+## 1. Install third-party
 - After installed Ubuntu 24 update and upgade
 
 ```
@@ -50,6 +51,7 @@ sudo apt install -y libimage-exiftool-perl
 ```
 
 - Install MariaDB
+
 ```
 sudo curl -o /etc/apt/trusted.gpg.d/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
 
@@ -151,7 +153,7 @@ Thanks for using MariaDB!
 ```
 
 
-## 2. Installing ActiveMQ
+## 2. ActiveMQ
 (https://www.howtoforge.com/how-to-install-apache-activemq-on-ubuntu-20-04/)
 
 - Download package
@@ -192,7 +194,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable activemq --now
 ```
 
-## 3. Creating DB for Alfresco
+
+## 3. Create Database
 - Run query
 
 ```
@@ -223,7 +226,7 @@ sudo systemctl restart mariadb
 ```
 
 
-## 4. Installing Tomcat
+## 4. Install Tomcat
 - Download Tomcat 10.1.24
 
 ```
@@ -275,7 +278,7 @@ rm /opt/alfresco/tomcat/webapps/*
 ```
 
 
-## 5. Installing Alfresco Community 23
+## 5. Install Alfresco
 - Download Alfresco 23 and Alfresco SSL Generator
 
 ```
@@ -304,7 +307,7 @@ mv licenses /opt/alfresco/
 rm -R web-server
 ```
 
-- update alfresco.xml and share.xml
+- update ``alfresco.xml`` and ``share.xml``
 
 ```
 nano /opt/alfresco/tomcat/conf/Catalina/localhost/alfresco.xml
@@ -335,7 +338,7 @@ cp -R /opt/alfresco/ssl-tool/certificates /opt/alfresco/data/keystore/.
 cp -R /opt/alfresco/ssl-tool/ca /opt/alfresco/data/keystore/.
 ```
 
-- edit /opt/alfresco/tomcat/conf/catalina.properties and integrate ``shared.loader=``
+- edit ``/opt/alfresco/tomcat/conf/catalina.properties`` and integrate ``shared.loader=``
 
 ```
 nano /opt/alfresco/tomcat/conf/catalina.properties
@@ -398,7 +401,7 @@ sudo chown alfresco:alfresco -R /opt/alfresco
 ```
 
 
-## 6. Installing Alfresco Module Package (AMP)
+## 6. Install AMP
 (https://docs.alfresco.com/content-services/community/install/zip/amp/)
 
 - Run ``apply_amps.sh`` as ``alfresco`` user
@@ -411,7 +414,7 @@ exit
 ```
 
 
-## 7. Installing Alfresco Transformer Service (ATS)
+## 7. Install Alfresco Transformer Service
 (https://docs.alfresco.com/transform-service/latest/)
 
 - Download Alfresco PDF Render
@@ -439,7 +442,7 @@ wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/conten
 sudo cp alfresco-transform-core-aio-boot-2.7.0-A1.jar /opt/alfresco/bin/
 ```
 
-- make the script to run service di avvio-configurazione
+- make the script to run the Alfresco Transform Service
 
 ```
 sudo nano /opt/alfresco/bin/alfrescots.sh
@@ -687,6 +690,6 @@ systemctl stop activemq
 
 **NOT COMPLETE**
 
-**Woking in progress**
+Woking in progress
 
 Coming soon: installing Alfresco Search System, installing the reverse proxy and makeing a Systemd unit to launch the Alfresco Stack.
