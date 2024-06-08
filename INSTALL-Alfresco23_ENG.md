@@ -21,18 +21,17 @@ A didatic guide to full installation of Alfresco 23 Community from a ZIP package
 # Procedure
 To get started, prepare your production server by installing the prerequisite software (JRE, database, and message broker) before continuing.
 
-1. Install third-party software used by Community Edition. This includes LibreOffice, ImageMagick, and Alfresco PDF Renderer.
-- Download the distribution zip file by accessing the Alfresco Community Edition download page.
-- Generate certificates for mutual TLS.
-- Download Tomcat and review the installation steps required.
-- Set up Tomcat.
-- Install and configure Community Edition.
-- Install any Alfresco Module Packages (AMPs) such as Alfresco Share, Google Docs Integration, and Alfresco Office Services.
-- Set up ActiveMQ.
-- install AMP (https://docs.alfresco.com/content-services/community/install/zip/amp/)
+1. Installing third-party software;
+2. installing ActiveMQ;
+3. creating DB for Alfresco;
+4. installing Tomcat;
+5. installing Alfresco Community 23;
+6. installing Alfresco Module Package (AMP);
+7. installing Alfresco Transformer Service (ATS);
+8. first test.
 
 
-## 1. Install third-party
+## 1. Install third-party software
 - After installed Ubuntu 24 update and upgade
 
 ```
@@ -152,7 +151,7 @@ Thanks for using MariaDB!
 ```
 
 
-## 2. ActiveMQ
+## 2. Installing ActiveMQ
 (https://www.howtoforge.com/how-to-install-apache-activemq-on-ubuntu-20-04/)
 
 - Download package
@@ -193,8 +192,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable activemq --now
 ```
 
-
-## 3. Create Database
+## 3. Creating DB for Alfresco
 - Run query
 
 ```
@@ -225,7 +223,7 @@ sudo systemctl restart mariadb
 ```
 
 
-## 4. Install Tomcat
+## 4. Installing Tomcat
 - Download Tomcat 10.1.24
 
 ```
@@ -277,7 +275,7 @@ rm /opt/alfresco/tomcat/webapps/*
 ```
 
 
-## 5. Install Alfresco
+## 5. Installing Alfresco Community 23
 - Download Alfresco 23 and Alfresco SSL Generator
 
 ```
@@ -400,7 +398,7 @@ sudo chown alfresco:alfresco -R /opt/alfresco
 ```
 
 
-## 6. Install AMP
+## 6. Installing Alfresco Module Package (AMP)
 (https://docs.alfresco.com/content-services/community/install/zip/amp/)
 
 - Run ``apply_amps.sh`` as ``alfresco`` user
@@ -413,7 +411,7 @@ exit
 ```
 
 
-## 7. Install Alfresco Transformer Service
+## 7. Installing Alfresco Transformer Service (ATS)
 (https://docs.alfresco.com/transform-service/latest/)
 
 - Download Alfresco PDF Render
