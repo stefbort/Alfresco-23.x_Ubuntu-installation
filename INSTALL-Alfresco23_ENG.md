@@ -1,5 +1,6 @@
-# Not completed.
-# !! WORKIN IN PROGRESS !!
+# Not completed: WORKIN IN PROGRESS !!
+
+-----
 
 # Full Installation Alfresco Community 23 Guide from ZIP package
 
