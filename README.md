@@ -6,7 +6,7 @@ By: Stefano Bortolato <br>
 Site: [www.digitaldsb.it](www.digitaldsb.it)
 
 [Inglish guide INSTALL-Alfresco23_ENG.md](INSTALL-Alfresco23_ENG.md)  <br>
-[Guida Italiana INSTALL-Alfresco23_ITA.md](INSTALL-Alfresco23_ENG.md)
+[Guida Italiana INSTALL-Alfresco23_ITA.md](INSTALL-Alfresco23_ITA.md)
 
 ----
 
