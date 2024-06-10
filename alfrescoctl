@@ -1,0 +1,69 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:             alfrescoctl
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         2
+# Short-Description:    Alfresco Stack Controller
+### END INIT INFO
+
+
+ACTION=$1
+
+case in $ACTION
+esac
+
+case "$1" in
+	start)
+		systemctl start mariadb
+		systemctl start activemq
+		systemctl start alfrescots
+		systemctl start alfresco-search
+		systemctl start alfresco
+		systemctl start nginx
+	;;
+
+	stop)
+		systemctl stop nginx
+		systemctl stop alfresco
+		systemctl stop alfresco-search
+		systemctl stop alfrescots
+		systemctl stop activemq
+		systemctl stop mariadb
+	;;
+
+	restart)
+		systemctl stop nginx
+		systemctl stop alfresco
+		systemctl stop alfresco-search
+		systemctl stop alfrescots
+		systemctl stop activemq
+		systemctl stop mariadb
+
+		sleep 60
+
+		systemctl start mariadb
+		systemctl start activemq
+		systemctl start alfrescots
+		systemctl start alfresco-search
+		systemctl start alfresco
+		systemctl start nginx
+	;;
+	status)
+		systemctl status mariadb
+		systemctl status activemq
+		systemctl status alfrescots
+		systemctl status alfresco-search
+		systemctl status alfresco
+		systemctl status nginx
+	;;
+
+	*)
+		echo "Usage: alfrescoctl {start|stop|restart|status}"
+		exit 1
+	;;
+esac
+
+exit 0
