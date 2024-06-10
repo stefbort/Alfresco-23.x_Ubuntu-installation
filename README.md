@@ -8,6 +8,8 @@ Site: [www.digitaldsb.it](www.digitaldsb.it)
 [Inglish guide INSTALL-Alfresco23_ENG.md](INSTALL-Alfresco23_ENG.md)  <br>
 [Guida Italiana INSTALL-Alfresco23_ITA.md](INSTALL-Alfresco23_ITA.md)
 
+[Script to auto-start Alfresco Stack: alfrescoctl](alfrescoctl)
+
 ----
 
 [Full guide aviable from... coming soon](https://www.digitaldsb.it)
