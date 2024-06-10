@@ -1,7 +1,3 @@
-# Not completed: WORKIN IN PROGRESS !!
-
------
-
 # Full Installation Alfresco Community 23 Guide from ZIP package
 
 A didatic guide to full installation of Alfresco 23 Community from a ZIP package.
@@ -688,8 +684,497 @@ systemctl stop mariadb
 systemctl stop activemq
 ```
 
-**NOT COMPLETE**
 
-Woking in progress
+## 9. Install Alfresco Search Services
+(https://docs.alfresco.com/search-services/latest/)
+- Upgrade the global config file of Alfresco
 
-Coming soon: installing Alfresco Search System, installing the reverse proxy and makeing a Systemd unit to launch the Alfresco Stack.
+```
+nano /opt/alfresco/tomcat/shared/classes/alfresco-global.properties
+```
+
+```
+[ ... ]
+#
+# Solr setup TLS
+#index.subsystem.name=solr6
+#solr.secureComms=https
+#solr.port=8983
+
+#
+# Solr setup SECRET
+index.subsystem.name=solr6
+solr.secureComms=secret
+solr.port=8983
+solr.sharedSecret=MySecretPassword
+[ ... ]
+```
+
+
+- Download ``alfresco-search-services-2.0.9.1.zip``, unzip it and publish it
+
+```
+cd ~ && cd SW
+wget https://nexus.alfresco.com/nexus/service/local/repositories/releases/content/org/alfresco/alfresco-search-services/2.0.9.1/alfresco-search-services-2.0.9.1.zip
+
+unzip alfresco-search-services-2.0.9.1.zip
+mv alfresco-search-services /opt/alfresco/alfresco-search
+```
+
+- customize ``/opt/alfresco/alfresco-search/solrhome/conf/shared.properties``
+
+```
+nano /opt/alfresco/alfresco-search/solrhome/conf/shared.properties
+```
+
+```
+[ ... ]
+alfresco.identifier.property.0={http://www.alfresco.org/model/content/1.0}creator
+alfresco.identifier.property.1={http://www.alfresco.org/model/content/1.0}modifier
+alfresco.identifier.property.2={http://www.alfresco.org/model/content/1.0}userName
+alfresco.identifier.property.3={http://www.alfresco.org/model/content/1.0}authorityName
+alfresco.identifier.property.4={http://www.alfresco.org/model/content/1.0}lockOwner
+
+# Suggestable Propeties
+alfresco.suggestable.property.0={http://www.alfresco.org/model/content/1.0}name
+alfresco.suggestable.property.1={http://www.alfresco.org/model/content/1.0}title
+alfresco.suggestable.property.2={http://www.alfresco.org/model/content/1.0}description
+alfresco.suggestable.property.3={http://www.alfresco.org/model/content/1.0}content
+
+# Data types that support cross locale/word splitting/token patterns if tokenised
+alfresco.cross.locale.property.0={http://www.alfresco.org/model/content/1.0}name
+alfresco.cross.locale.property.1={http://www.alfresco.org/model/content/1.0}lockOwner
+
+# Data types that support cross locale/word splitting/token patterns if tokenised
+alfresco.cross.locale.datatype.0={http://www.alfresco.org/model/dictionary/1.0}text
+alfresco.cross.locale.datatype.1={http://www.alfresco.org/model/dictionary/1.0}content
+alfresco.cross.locale.datatype.2={http://www.alfresco.org/model/dictionary/1.0}mltext
+[ ... ]
+```
+
+- set Solr
+**NB**: in pruduction the memory XMS & XMX must be growed to 4GB or more to avoid a crash
+
+```
+nano /opt/alfresco/alfresco-search/solr.in.sh
+```
+
+```
+[ ... ]
+#SOLR_JAVA_MEM="-Xms2g -Xmx2g"
+[ ... ]
+#SOLR_LOGS_DIR=../../logs
+#LOG4J_PROPS=$SOLR_LOGS_DIR/log4j.properties
+[ ... ]
+SOLR_SOLR_HOST=localhost
+SOLR_ALFRESCO_HOST=localhost
+[ ... ]
+#SOLR_OPTS="$SOLR_OPTS -Dsolr.jetty.request.header.size=1000000 -Dsolr.jetty.threads.stop.timeout=300000 -Ddisable.configEdit=true"
+[ ... ]
+```
+
+- update permissions
+
+```
+sudo chown alfresco:alfresco -R /opt/alfresco/alfresco-search
+sudo chmod +x /opt/alfresco/alfresco-search/solr.in.sh
+sudo rm /opt/alfresco/alfresco-search/solr.in.cmd
+```
+
+- make the unit of SystemD
+
+```
+sudo nano /usr/lib/systemd/system/alfresco-search.service
+```
+
+```
+[Unit]
+Description=Alfresco search service Solr
+After=network.target
+
+[Service]
+Type=forking
+Restart=always
+
+User=alfresco
+Group=alfresco
+
+LimitNOFILE=8192:65536
+
+ExecStart=/opt/alfresco/alfresco-search/solr/bin/solr start -a '-Dcreate.alfresco.defaults=alfresco,archive -Dalfresco.secureComms=secret -Dalfresco.secureComms.secret=MySecretPassword'
+ExecStop=/opt/alfresco/alfresco-search/solr/bin/solr stop -all
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- load the unit % test ``alfresco-search``
+
+```
+sudo systemctl daemon-reload
+sudo systemctl start alfresco-search
+sudo systemctl status alfresco-search
+sudo systemctl stop alfresco-search
+```
+
+
+## 10. Full run to test
+- Let's a full run manualy to test
+
+```
+sudo systemctl stop activemq
+sudo systemctl stop mariadb
+sudo systemctl stop alfrescots
+sudo systemctl stop alfresco-search
+sudo systemctl stop alfresco
+
+sudo systemctl start activemq
+sudo systemctl start mariadb
+sudo systemctl start alfrescots
+sudo systemctl start alfresco-search
+sudo systemctl start alfresco
+
+sudo systemctl status activemq
+sudo systemctl status mariadb
+sudo systemctl status alfrescots
+sudo systemctl status alfresco-search
+sudo systemctl status alfresco
+```
+
+- open your web broweser and access to ``http://< alfresco IP >:8080/``, authenticate with default account \(Username: **admin**   Password: **admin**\) and chek evrythig.
+
+- after check stop the alfresco stack
+
+```
+sudo systemctl stop activemq
+sudo systemctl stop mariadb
+sudo systemctl stop alfrescots
+sudo systemctl stop alfresco-search
+sudo systemctl stop alfresco
+```
+
+
+## 11. Install a Reverse Proxy
+[Adding a Reverse proxy](https://docs.alfresco.com/content-services/latest/admin/securing-install/#addreverseproxy)<br>
+[Question about upload Issue in Alfresco 6.2 Content Services ?](https://hub.alfresco.com/t5/alfresco-content-services-forum/question-about-upload-issue-in-alfresco-6-2-content-services/td-p/303143)<br>
+[Error uploading large files (>2gb) through nginx reverse proxy to container](https://serverfault.com/questions/1098725/error-uploading-large-files-2gb-through-nginx-reverse-proxy-to-container)
+
+- Install Nginx
+
+```
+sudo apt install nginx
+```
+
+- create the configuration file ``example.com.conf``
+
+```
+sudo nano /etc/nginx/sites-enabled/example.com.conf
+```
+
+```
+# worker_processes  1;
+#
+#events {
+#    worker_connections  1024;
+#}
+#
+#http {
+    server {
+        listen 80;
+        listen [::]:80;
+
+       server_name example.com www.example.com;
+
+       root /var/www/example.com/html;
+       index index.html;
+
+        client_max_body_size 0;
+
+        set  $allowOriginSite *;
+        proxy_pass_request_headers on;
+        proxy_pass_header Set-Cookie;
+
+        # External settings, do not remove
+        #ENV_ACCESS_LOG
+
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+        proxy_redirect off;
+        proxy_buffering off;
+        proxy_set_header Host            $host:$server_port;
+        proxy_set_header X-Real-IP       $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass_header Set-Cookie;
+
+        # Protect access to SOLR APIs
+        location ~ ^(/.*/service/api/solr/.*)$ {return 403;}
+        location ~ ^(/.*/s/api/solr/.*)$ {return 403;}
+        location ~ ^(/.*/wcservice/api/solr/.*)$ {return 403;}
+        location ~ ^(/.*/wcs/api/solr/.*)$ {return 403;}
+
+        location ~ ^(/.*/proxy/.*/api/solr/.*)$ {return 403 ;}
+        location ~ ^(/.*/-default-/proxy/.*/api/.*)$ {return 403;}
+        
+        # Prometheus settings, do not remove
+        #PROMETHEUS_LOCATION
+        
+        #location / {
+        #    proxy_pass http://localhost:8080;
+        #}
+        location /alfresco/ {
+            # proxy_pass http://alfresco:8080;
+            #
+            # If using external proxy / load balancer (for initial redirect if no trailing slash)
+            # absolute_redirect off;
+
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host $http_host;
+            proxy_http_version 1.1;
+            proxy_pass http://localhost:8080/alfresco/;
+        }
+
+        location /share/ {
+            proxy_pass_header       Set-Cookie;
+            proxy_set_header        Origin                  "";
+            proxy_set_header        Proxy                   "";
+            proxy_set_header        X-Forwarded-Server      $host;
+            proxy_set_header        X-Forwarded-Host        $http_host;
+            proxy_set_header        Referer                 "";
+            
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Host $http_host;
+            proxy_http_version 1.1;
+            
+            # Allow large file upload
+            client_max_body_size    0;
+
+            proxy_pass http://localhost:8080/share/;
+        }
+
+        # Share settings, do not remove
+        #SHARE_LOCATION
+
+        # Control Center settings, do not remove
+        #CONTROL_CENTER_LOCATION
+
+        # ADW settings, do not remove
+        #ADW_LOCATION
+
+        # ACA settings, do not remove
+        #ACA_LOCATION
+
+        # Sync service settings, do not remove
+        #SYNCSERVICE_LOCATION
+    }
+#}
+```
+
+- create the file-page ``index.html``
+
+```
+sudo nano /var/www/example.com/html/index.html
+```
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Custom ECM home Page</title>
+</head>
+<body><h1>My ECM</h1>
+<p>
+<a href="./alfresco">Alfresco Home</a><br>
+<a href="./share">Alfresco Share</a><br>
+<a href="./page1.html">Page 1</a><br>
+<a href="./page2.html">Page 2</a><br>
+<a href="./page3.html">Page 3</a>
+</p>
+</body>
+</html>
+```
+
+- set rigth owner
+
+```
+sudo chown www-data:www-data -R /var/www/example.com/html
+```
+
+- enable the example.com
+
+```
+sudo ln -s /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-enabled/
+```
+
+- run and test Nginx
+
+```
+sudo systemctl disable nginx
+sudo systemctl restart nginx
+sudo systemctl status nginx
+sudo systemctl stop nginx
+```
+
+
+## 12. Enable firewall
+- Enable ``ufw``
+
+```
+sudo ufw allow 'Nginx Full'
+sudo ufw allow 'OpenSSH'
+sudo ufw enable
+Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup
+
+sudo ufw status
+```
+
+
+## 13. Startup automation
+- Stop and disable the services
+
+```
+sudo systemctl stop nginx
+sudo systemctl stop alfresco
+sudo systemctl stop alfresco-search
+sudo systemctl stop alfrescots
+sudo systemctl stop activemq
+sudo systemctl stop mariadb
+
+sudo systemctl disable nginx
+sudo systemctl disable alfresco
+sudo systemctl disable alfresco-search
+sudo systemctl disable alfrescots
+sudo systemctl disable activemq
+sudo systemctl disable mariadb
+```
+
+- Create ``/etc/init.d/alfrescoctl``
+
+```
+sudo nano /etc/init.d/alfrescoctl
+```
+
+```
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:             alfrescoctl
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         2
+# Short-Description:    Alfresco Stack Controller
+### END INIT INFO
+
+set -e
+
+ACTION=$1
+
+case "$ACTION" in
+	start)
+		systemctl start mariadb
+		systemctl start activemq
+		systemctl start alfrescots
+		systemctl start alfresco-search
+		sleep 30
+		systemctl start alfresco
+		systemctl start nginx
+	;;
+
+	stop)
+		systemctl stop nginx
+		systemctl stop alfresco
+		systemctl stop alfresco-search
+		systemctl stop alfrescots
+		systemctl stop activemq
+		systemctl stop mariadb
+	;;
+
+	restart)
+		systemctl stop nginx
+		systemctl stop alfresco
+		systemctl stop alfresco-search
+		systemctl stop alfrescots
+		systemctl stop activemq
+		systemctl stop mariadb
+
+		sleep 60
+
+		systemctl start mariadb
+		systemctl start activemq
+		systemctl start alfrescots
+		systemctl start alfresco-search
+		sleep 30
+		systemctl start alfresco
+		systemctl start nginx
+	;;
+	status)
+		systemctl status mariadb
+		systemctl status activemq
+		systemctl status alfrescots
+		systemctl status alfresco-search
+		systemctl status alfresco
+		systemctl status nginx
+	;;
+
+	*)
+		echo "Usage: alfrescoctl {start|stop|restart|status}"
+		exit 1
+	;;
+esac
+
+exit 0
+```
+
+- set permissions
+
+```
+sudo chmod +x /etc/init.d/alfrescoctl
+```
+
+- load the new init file in SystemD
+
+```
+sudo systemctl daemon-reload
+```
+
+
+## 14. Completamento
+- Stack check
+
+```
+sudo systemctl start alfrescoctl 
+sudo systemctl status alfrescoctl
+```
+
+- access to ``http://www.example.com`` and check
+- enable ``alfrescoctl`` and restart \(host-\)server
+
+```
+sudo systemctl enable alfrescoctl
+sudo systemctl reboot
+```
+
+- after the reboot check the rigth working.
+
+
+## 15. Tuning
+We report some important precautions for our Alfresco installation if we bring it into production.<br>
+Remember that the cummunity version does not support all the enterprise functions and not all modules are available.<br>
+Also pay attention to the official manuals which do not always completely describe the configurations for the Community.
+
+
+### 15.1 Alfresco componenti aggiuntivi
+Add-ons (official):
+- [Alfresco Digital Workspace 4.4](https://docs.alfresco.com/digital-workspace/latest/)
+- [Alfresco Mobile Workspace](https://docs.alfresco.com/mobile-workspace/latest/)
+- [Alfresco Media Management 1.4](https://docs.alfresco.com/media-management/latest/)
+- [Alfresco Intelligence Services 3.1](https://docs.alfresco.com/intelligence-services/latest/)
+- [Alfresco Sync Service 5.0](https://docs.alfresco.com/sync-service/latest/)
+- [Alfresco Desktop Sync 1.18](https://docs.alfresco.com/desktop-sync/latest/)
+- [Alfresco Enterprise Viewer 4.0](https://docs.alfresco.com/enterprise-viewer/latest/)
+- [Alfresco Office Services 3.0](https://docs.alfresco.com/microsoft-office/latest/)
+- [Alfresco Content Accelerator 4.0](https://docs.alfresco.com/content-accelerator/latest/)
