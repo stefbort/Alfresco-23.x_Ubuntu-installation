@@ -12,4 +12,4 @@ Site: [www.digitaldsb.it](www.digitaldsb.it)
 
 ----
 
-[Full guide aviable from... coming soon](https://www.digitaldsb.it)
+[Full guide aviable from... coming soon]([https://www.digitaldsb.it](https://www.digitaldsb.it/portal/informatica/guida-per-una-installazione-completa-di-alfresco-community-23-dal-pacchetto-zip))
